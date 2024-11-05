@@ -45,7 +45,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// Add connection to the active connections map
 	connMutex.Lock()
 	connections[conn] = true
-	connectionID := fmt.Sprintf("%p", conn) // Unique identifier for logging
+	connectionID := fmt.Sprintf("%p", &conn) // Unique identifier for logging
 
 	clientIP := r.RemoteAddr
 	userAgent := r.UserAgent()
