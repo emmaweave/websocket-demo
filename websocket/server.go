@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,6 +24,18 @@ var upgrader = websocket.Upgrader{
 // Store active connections with a mutex for thread-safe access
 var connections = make(map[*websocket.Conn]bool)
 var connMutex = sync.Mutex{}
+
+func getClientIP(r *http.Request) string {
+	// Check if "X-Forwarded-For" header is present
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		// The client IP is typically the first IP in the X-Forwarded-For list
+		ips := strings.Split(forwarded, ",")
+		return strings.TrimSpace(ips[0])
+	}
+	// Fallback to RemoteAddr if X-Forwarded-For is not set
+	return r.RemoteAddr
+}
 
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
@@ -47,7 +60,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	connections[conn] = true
 	connectionID := fmt.Sprintf("%p", &conn) // Unique identifier for logging
 
-	clientIP := r.RemoteAddr
+	clientIP := getClientIP(r)
 	userAgent := r.UserAgent()
 	startTime := time.Now()
 
