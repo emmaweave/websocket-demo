@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -18,6 +19,10 @@ type ProgressUpdate struct {
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
+
+// Store active connections with a mutex for thread-safe access
+var connections = make(map[*websocket.Conn]bool)
+var connMutex = sync.Mutex{}
 
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
@@ -36,6 +41,22 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// defer conn.Close()
+
+	// Add connection to the active connections map
+	connMutex.Lock()
+	connections[conn] = true
+	connectionID := fmt.Sprintf("%p", conn) // Unique identifier for logging
+
+	clientIP := r.RemoteAddr
+	userAgent := r.UserAgent()
+	startTime := time.Now()
+
+	log.Printf("New connection [%s] from IP: %s, User-Agent: %s at %s", connectionID, clientIP, userAgent, startTime.Format(time.RFC3339))
+
+	log.Printf("New WebSocket connection: %p", conn)
+	log.Printf("Total active connections: %d", len(connections))
+
+	connMutex.Unlock()
 
 	// Get assetID from query parameters (for tracking purposes)
 	assetID := r.URL.Query().Get("assetID")

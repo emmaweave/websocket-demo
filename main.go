@@ -9,8 +9,6 @@ import (
 	"websocket-demo/websocket"
 )
 
-// const env = "https://websocket-demo123-3a8d482bdc30.herokuapp.com"
-
 func main() {
 	http.HandleFunc("/generate", startAssetGeneration)
 	http.HandleFunc("/ws", websocket.HandleWebSocket)
@@ -40,6 +38,7 @@ func startAssetGeneration(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("start generating and respond with new assetID")
 	assetID := "12345"
+	// wsURL := fmt.Sprintf("ws://localhost:8080/ws?assetID=%s", assetID)
 	wsURL := fmt.Sprintf("ws://websocket-demo123-3a8d482bdc30.herokuapp.com/ws?assetID=%s", assetID)
 
 	// Prepare the response with the WebSocket URL
