@@ -5,16 +5,23 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"websocket-demo/websocket"
 )
 
+// const env = "https://websocket-demo123-3a8d482bdc30.herokuapp.com"
+
 func main() {
 	http.HandleFunc("/generate", startAssetGeneration)
-
 	http.HandleFunc("/ws", websocket.HandleWebSocket)
 
-	log.Println("Server started on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port for local testing
+	}
+
+	log.Printf("Starting server on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 type GenerateResponse struct {
@@ -33,7 +40,7 @@ func startAssetGeneration(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("start generating and respond with new assetID")
 	assetID := "12345"
-	wsURL := fmt.Sprintf("ws://localhost:8080/ws?assetID=%s", assetID)
+	wsURL := fmt.Sprintf("ws://websocket-demo123-3a8d482bdc30.herokuapp.com/ws?assetID=%s", assetID)
 
 	// Prepare the response with the WebSocket URL
 	response := GenerateResponse{

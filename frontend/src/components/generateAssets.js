@@ -5,10 +5,12 @@ function AssetProgress() {
   const [wsUrl, setWsUrl] = useState(null);
   const [assetID, setAssetID] = useState(null);
 
+  const env = 'https://websocket-demo123-3a8d482bdc30.herokuapp.com'
+
   // Step 1: Send a POST request to initiate asset generation
   const initiateGeneration = async () => {
     try {
-      const response = await fetch("http://localhost:8080/generate", {
+      const response = await fetch(`${env}/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -21,7 +23,7 @@ function AssetProgress() {
         const data = await response.json();
         setWsUrl(data.wsUrl); // Set the WebSocket URL returned by the server
         
-    const url = 'ws://localhost:8080/ws?assetID=12345';
+    const url = data.wsUrl;
     const urlObj = new URL(url);
     const assetID = urlObj.searchParams.get('assetID')
     
